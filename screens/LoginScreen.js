@@ -48,7 +48,7 @@ export default class Login extends Component {
         throw new Error('Facebook Login Failed');
       }
     } catch ({ message }) {
-      console.error(`Facebook Login Error: ${message}`);
+      console.log(`Facebook Login Error: ${message}`);
     }
   }
 

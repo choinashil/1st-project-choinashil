@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { StyleSheet, Text, View, Platform, ViewPagerAndroid } from 'react-native';
 import { SecureStore } from 'expo';
-import MyPhotos from './MyPhotos';
+import PhotoScreen from './PhotoScreen';
 import CameraButton from '../components/CameraButton';
 
 const ip = '192.168.0.40';
@@ -66,22 +66,25 @@ export default class MainScreen extends Component {
         </View>
       );
     }
-    
-    const { userName } = this.props.screenProps;
+
+    const { navigation } = this.props;
+    const { userName, setUserInfo } = this.props.screenProps;
     const { myPhotoList, receivedPhotoList } = this.state;
 
     return (
       <Fragment>
         <ViewPagerAndroid style={styles.container}>
           <View>
-            <MyPhotos 
+            <PhotoScreen 
               userName={userName} 
               photoList={myPhotoList} 
               onSingleTap={this._onMyPhotoSingleTap.bind(this)} 
+              navigation={navigation}
+              setUserInfo={setUserInfo.bind(this)}
             />
           </View>
           <View>
-            <MyPhotos 
+            <PhotoScreen 
               userName={userName} 
               photoList={receivedPhotoList} 
               onSingleTap={this._onReceivedPhotoSingleTap.bind(this)} 
