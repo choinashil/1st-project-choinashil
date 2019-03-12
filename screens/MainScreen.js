@@ -1,27 +1,95 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { StyleSheet, Text, View, Platform, ViewPagerAndroid } from 'react-native';
+import { SecureStore } from 'expo';
 import MyPhotos from './MyPhotos';
-import ReceivedPhotos from './ReceivedPhotos';
+import CameraButton from '../components/CameraButton';
 
-export default class Example extends Component {
+const ip = '192.168.0.40';
+
+export default class MainScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      myPhotoList: [],
+      receivedPhotoList: []
+    };
+  }
+
+  componentDidMount() {
+    this._getPhotos();
+  }
+
+  async _getPhotos() {
+    try {
+      const token = await SecureStore.getItemAsync('ACCESS_TOKEN');
+      const { userId } = this.props.screenProps;
+
+      const myPhotoResponse = await fetch(`http://${ip}:3000/api/users/${userId}/my-photos`, {
+        method: 'get',
+        headers: {'Authorization': `Bearer ${token}`}
+      });
+      const myPhotoJson = await myPhotoResponse.json();
+      const myPhotoList = myPhotoJson.myPhotoList;
+
+      const receivedPhotoResponse = await fetch(`http://${ip}:3000/api/users/${userId}/received-photos`, {
+        method: 'get',
+        headers: {'Authorization': `Bearer ${token}`}
+      });
+      const receivedJson = await receivedPhotoResponse.json();
+      const receivedPhotoList = receivedJson.receivedPhotoList;
+
+      this.setState({ myPhotoList, receivedPhotoList });
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  _onMyPhotoSingleTap(index) {
+    this.setState(prevState => {
+      prevState.myPhotoList[index].showPhoto = !prevState.myPhotoList[index].showPhoto;
+      return { myPhotoList: prevState.myPhotoList };
+    });
+  }
+
+  _onReceivedPhotoSingleTap(index) {
+    this.setState(prevState => {
+      prevState.receivedPhotoList[index].showPhoto = !prevState.receivedPhotoList[index].showPhoto;
+      return { receivedPhotoList: prevState.receivedPhotoList };
+    });
+  }
+
   render() {
     if (Platform.OS !== 'android') {
       return (
-        <Text>Sorry, this is a demo of android-only native components</Text>
+        <View style={styles.container}>
+          <Text>Sorry, this is a demo of android-only native components</Text>
+        </View>
       );
     }
-
-    const { userId, userName } = this.props.screenProps;
+    
+    const { userName } = this.props.screenProps;
+    const { myPhotoList, receivedPhotoList } = this.state;
 
     return (
-      <ViewPagerAndroid style={styles.container}>
-        <View>
-          <MyPhotos userId={userId} userName={userName} />
-        </View>
-        <View>
-          <ReceivedPhotos userId={userId} />
-        </View>
-      </ViewPagerAndroid>
+      <Fragment>
+        <ViewPagerAndroid style={styles.container}>
+          <View>
+            <MyPhotos 
+              userName={userName} 
+              photoList={myPhotoList} 
+              onSingleTap={this._onMyPhotoSingleTap.bind(this)} 
+            />
+          </View>
+          <View>
+            <MyPhotos 
+              userName={userName} 
+              photoList={receivedPhotoList} 
+              onSingleTap={this._onReceivedPhotoSingleTap.bind(this)} 
+            />
+          </View>
+        </ViewPagerAndroid>
+        <CameraButton />
+      </Fragment>
     );
   }
 }
@@ -29,17 +97,7 @@ export default class Example extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === 'ios' ? 20 : 0,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  page: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pageText: {
-    fontSize: 21,
-    color: 'white',
-  },
+    alignItems: 'center'
+  }
 });

@@ -1,58 +1,27 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { SecureStore, GestureHandler } from 'expo';
-import Map from '../components/Map';
+import { GestureHandler } from 'expo';
 import { AntDesign } from '@expo/vector-icons';
+import Map from '../components/Map';
 const { TapGestureHandler, State } = GestureHandler;
-const ip = '192.168.0.40';
 
 export default class MyPhotos extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      myPhotoList: []
-    };
-  }
-
-  componentDidMount() {
-    this._getMyPhotos();
-  }
-
-  async _getMyPhotos() {
-    try {
-      const token = await SecureStore.getItemAsync('ACCESS_TOKEN');
-      const { userId } = this.props;
-      const response = await fetch(`http://${ip}:3000/api/users/${userId}/my-photos`, {
-        method: 'get',
-        headers: {'Authorization': `Bearer ${token}`}
-      });
-      const json = await response.json();
-      const myPhotoList = json.myPhotoList;
-      this.setState({ myPhotoList });
-    } catch(err) {
-      console.error(err);
-    }
-  }
-
   _onPressLogoutBtn() {
     Alert.alert('Logout', '로그아웃 하시겠습니까?', [
       {text: 'Cancel', style: 'cancel'},
-      {text: 'OK', onPress: () => console.log('OK Pressed')},
+      {text: 'OK', onPress: () => {console.log('logout')}}
     ]);
   }
 
   _onSingleTap(index, event) {
+    const { onSingleTap } = this.props;
     if (event.nativeEvent.state === State.ACTIVE) {
-      this.setState(prevState => {
-        prevState.myPhotoList[index].showPhoto = !prevState.myPhotoList[index].showPhoto;
-        return { myPhotoList: prevState.myPhotoList };
-      });
+      onSingleTap(index);
     }
   };
 
   render() {
-    const { myPhotoList } = this.state; 
-    const { userName } = this.props;
+    const { userName, photoList } = this.props;
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -68,7 +37,7 @@ export default class MyPhotos extends Component {
           showsVerticalScrollIndicator={false}
         >
           {
-            myPhotoList.map((list, index) => {
+            photoList.map((list, index) => {
               return (
                 <TapGestureHandler
                   key={index}
@@ -86,14 +55,9 @@ export default class MyPhotos extends Component {
                   </View>
                 </TapGestureHandler>
               );
-            })
+            }) 
           }
-        </ScrollView>
-        <TouchableOpacity style={styles.cameraBtnWrapper}>
-          <View style={styles.cameraBtnOuterCircle}>
-            <View style={styles.cameraBtnInnerCircle} />
-          </View>
-        </TouchableOpacity>
+        </ScrollView> 
       </View>
     );
   }
@@ -133,25 +97,5 @@ const styles = StyleSheet.create({
     height: 320,
     borderRadius: 160,
     resizeMode: 'cover'
-  },
-  cameraBtnWrapper: {
-    position: 'absolute', 
-    bottom: 20
-  },
-  cameraBtnOuterCircle: {
-    flex: 1, 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    width: 60, 
-    height: 60, 
-    borderColor: '#dd2745', 
-    borderWidth: 6, 
-    borderRadius: 30
-  },
-  cameraBtnInnerCircle: {
-    width: 36, 
-    height: 36, 
-    backgroundColor: '#dd2745', 
-    borderRadius: 18
   }
 });
