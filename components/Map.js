@@ -29,14 +29,14 @@ export default class Map extends Component {
 
 const styles = StyleSheet.create({
   mapWrapper: {
-    width: 300,
-    height: 300,
-    borderRadius: 150,
+    width: 320,
+    height: 320,
+    borderRadius: 160,
     overflow: 'hidden'
   }, 
   map: {
-    width: 300,
-    height: 300,
+    width: 320,
+    height: 320,
     position: 'absolute'
   }
 });

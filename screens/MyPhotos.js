@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SecureStore, GestureHandler } from 'expo';
 import Map from '../components/Map';
 import { AntDesign } from '@expo/vector-icons';
@@ -34,6 +34,13 @@ export default class MyPhotos extends Component {
     }
   }
 
+  _onPressLogoutBtn() {
+    Alert.alert('Logout', '로그아웃 하시겠습니까?', [
+      {text: 'Cancel', style: 'cancel'},
+      {text: 'OK', onPress: () => console.log('OK Pressed')},
+    ]);
+  }
+
   _onSingleTap(index, event) {
     if (event.nativeEvent.state === State.ACTIVE) {
       this.setState(prevState => {
@@ -52,10 +59,10 @@ export default class MyPhotos extends Component {
           <View style={styles.logo}>
             <Text>LOGO</Text>
           </View>
-          <View style={styles.userStatus}>
+          <TouchableOpacity style={styles.userTab} onPress={this._onPressLogoutBtn.bind(this)}>
             <Text style={styles.userName}>{userName.split(' ')[0]}</Text>
             <AntDesign name="logout" size={17} color="#34495e" />
-          </View>
+          </TouchableOpacity>
         </View>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -108,7 +115,7 @@ const styles = StyleSheet.create({
   logo: {
     marginLeft: 10
   },
-  userStatus: {
+  userTab: {
     flexDirection:'row',
     marginRight: 10
   },
