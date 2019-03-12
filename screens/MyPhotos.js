@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
-import { SecureStore } from 'expo';
+import { SecureStore, GestureHandler } from 'expo';
+const { TapGestureHandler, State } = GestureHandler;
 
 const ip = '192.168.0.40';
 
@@ -32,23 +33,40 @@ export default class MyPhotos extends Component {
     }
   }
 
+  _onSingleTap = (index, event) => {
+    if (event.nativeEvent.state === State.ACTIVE) {
+      this.setState(prevState => {
+        prevState.myPhotoList[index].showPhoto = !prevState.myPhotoList[index].showPhoto;
+        return { myPhotoList: prevState.myPhotoList };
+      });
+    }
+  };
+
   render() {
-    const { myPhotoList } = this.state;
+    const { myPhotoList } = this.state; 
+    const { userName } = this.props;
     return (
       <View style={styles.container}>
-        <Text style={styles.paragraph}>Welcome {this.props.userName.split(' ')[0]}!</Text>
+        <View style={{backgroundColor: 'transparent'}}>
+          <Text style={styles.paragraph}>Welcome {userName.split(' ')[0]}!</Text>
+        </View>
         <ScrollView
           showsVerticalScrollIndicator={false}
         >
           {
             myPhotoList.map((list, index) => {
               return (
-                <View key={index} style={styles.wrapper}>
-                  <Image
-                    style={styles.image}
-                    source={{uri: `${list.photoUrl}`}} 
-                  />
-                </View>
+                <TapGestureHandler
+                  key={index}
+                  onHandlerStateChange={this._onSingleTap.bind(this, index)}
+                >
+                  <View style={styles.wrapper}>
+                    <Image
+                      style={styles.image}
+                      source={{uri: `${list.photoUrl}`}} 
+                    /> 
+                  </View>
+                </TapGestureHandler>
               );
             })
           }
@@ -63,7 +81,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   paragraph: {
     paddingTop: 30,
@@ -71,15 +89,23 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#34495e'
+    color: '#34495e',
+    backgroundColor: 'transparent'
   },
   wrapper: {
     borderBottomWidth: 30,
-    borderColor: '#fff'
+    borderColor: 'transparent'
+  }, 
+  mapWrapper: {
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    overflow: 'hidden'
   }, 
   image: {
     width: 300,
     height: 300,
-    borderRadius: 150
+    borderRadius: 150,
+    resizeMode: 'cover'
   }
 });
