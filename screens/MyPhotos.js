@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
 import { SecureStore, GestureHandler } from 'expo';
+import Map from '../components/Map';
 const { TapGestureHandler, State } = GestureHandler;
-
 const ip = '192.168.0.40';
 
 export default class MyPhotos extends Component {
@@ -45,6 +45,7 @@ export default class MyPhotos extends Component {
   render() {
     const { myPhotoList } = this.state; 
     const { userName } = this.props;
+
     return (
       <View style={styles.container}>
         <View style={{backgroundColor: 'transparent'}}>
@@ -61,10 +62,16 @@ export default class MyPhotos extends Component {
                   onHandlerStateChange={this._onSingleTap.bind(this, index)}
                 >
                   <View style={styles.wrapper}>
-                    <Image
-                      style={styles.image}
-                      source={{uri: `${list.photoUrl}`}} 
-                    /> 
+                    {
+                      list.showPhoto ? 
+                      <Image
+                        style={styles.image}
+                        source={{uri: `${list.photoUrl}`}} 
+                      /> 
+                      : <Map 
+                        position={{ lat: list.lat, lon: list.lon }}
+                      />
+                    }
                   </View>
                 </TapGestureHandler>
               );
