@@ -1,56 +1,24 @@
 import React, { Component } from 'react';
 import { AppLoading, SecureStore } from 'expo';
-import Login from './Login';
-import MyPhotos from './MyPhotos';
 
 const ip = '192.168.0.40';
 
 export default class SplashScreen extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      isReady: false,
-      isLoggedIn: false
-    };
-    this.result = false;
-    this.userId = '';
-    this.userName = '';
-    this.token = '';
+    this.isLoggedIn = false;
   }
 
-  render() {
-    if (!this.state.isReady) {
-      return (
-        <AppLoading
-          startAsync={this._checkLoginStatus.bind(this)}
-          onFinish={() => {
-            this.setState({ 
-              isReady: true,
-              isLoggedIn: this.result
-            });
-          }}
-          onError={console.warn}
-        />
-      );
-    } else {
-      return (this.state.isLoggedIn ? 
-        <MyPhotos 
-          userId={this.userId} 
-          userName={this.userName} 
-        /> 
-        : <Login 
-          token={this.token}
-          userId={this.userId} 
-          userName={this.userName} 
-        />
-      );
-    }
+  _changeState() {
+    const { navigation } = this.props;
+    navigation.navigate(this.isLoggedIn ? 'MainScreen' : 'LoginScreen');
   }
 
   async _checkLoginStatus() {
+    const { setUserInfo } = this.props.screenProps;
+
     try {
       const token = await SecureStore.getItemAsync('ACCESS_TOKEN');
-      this.token = token;
 
       if (token) {
         const response = await fetch(`http://${ip}:3000/api/auth/check`, {
@@ -58,20 +26,29 @@ export default class SplashScreen extends Component {
           headers: {'Authorization': `Bearer ${token}`}
         });
         const json = await response.json();
-        const { _id, userName } = json;
+        const { success, userId, userName } = json;
 
-        if (json.success) {
-          this.result = true;
-          this.userId = _id;
-          this.userName = userName;
+        if (success) {
+          setUserInfo(userId, userName);
+          this.isLoggedIn = true;
         } else {
-          this.result = false;
+          this.isLoggedIn = false;
         }
       } else {
-        this.result = false;
+        this.isLoggedIn = false;
       }
     } catch(err) {
       console.error(err);
     }
+  }
+
+  render() {
+    return (
+      <AppLoading
+        startAsync={this._checkLoginStatus.bind(this)}
+        onFinish={this._changeState.bind(this)}
+        onError={console.warn}
+      />
+    );
   }
 }
