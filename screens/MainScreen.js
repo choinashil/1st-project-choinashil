@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import { StyleSheet, Text, View, Platform, ViewPagerAndroid } from 'react-native';
+import { StyleSheet, Text, View, Platform, ViewPagerAndroid, TouchableOpacity } from 'react-native';
 import { SecureStore } from 'expo';
+import { Ionicons } from '@expo/vector-icons';
 import PhotoScreen from './PhotoScreen';
-import CameraButton from '../components/CameraButton';
 
 const ip = '192.168.0.40';
 
@@ -42,6 +42,11 @@ export default class MainScreen extends Component {
     } catch(err) {
       console.error(err);
     }
+  }
+
+  _onCameraBtnClick() {
+    const { navigation } = this.props;
+    navigation.navigate('CameraScreen');
   }
 
   _onMyPhotoSingleTap(index) {
@@ -91,7 +96,12 @@ export default class MainScreen extends Component {
             />
           </View>
         </ViewPagerAndroid>
-        <CameraButton />
+        <TouchableOpacity
+          style={styles.mainButton}
+          onPress={this._onCameraBtnClick.bind(this)}
+        >
+          <Ionicons name="ios-radio-button-on" size={70} color="#dd2745" />
+        </TouchableOpacity>
       </Fragment>
     );
   }
@@ -102,5 +112,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  mainButton: {
+    alignSelf: 'center',
+    position: 'absolute',
+    bottom: 20
   }
 });
