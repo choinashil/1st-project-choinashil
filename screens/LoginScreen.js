@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, ImageBackground } from 'react-native';
 import { Facebook, SecureStore } from 'expo';
 import { Entypo } from '@expo/vector-icons';
+import { FACEBOOK_APP_ID } from '../config';
 
-const facebookAppId = '585670038566373';
-const ip = '192.168.0.40';
- 
-export default class Login extends Component {
+export default class LoginScreen extends Component {
   async _login() {
     const { navigation } = this.props;
     const { setUserInfo } = this.props.screenProps;
@@ -15,7 +13,7 @@ export default class Login extends Component {
       const {
         type,
         token
-      } = await Facebook.logInWithReadPermissionsAsync(facebookAppId, {
+      } = await Facebook.logInWithReadPermissionsAsync(FACEBOOK_APP_ID, {
         permissions: ['public_profile']
       });
 
@@ -24,7 +22,7 @@ export default class Login extends Component {
         const userInfo = await response.json();
         const { id, name } = userInfo;
 
-        const res = await fetch(`http://${ip}:3000/api/auth/login`, {
+        const res = await fetch(`http://piccle-production.eu-west-1.elasticbeanstalk.com/api/auth/login`, {
           method: 'post',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
@@ -40,7 +38,7 @@ export default class Login extends Component {
             SecureStore.setItemAsync('ACCESS_TOKEN', access_token);
             setUserInfo(userId, userName);
             navigation.navigate('MainScreen');
-          } 
+          }
         } catch ({ message }) {
           throw `Expo Secure Error: ${message}`;
         }
@@ -54,13 +52,12 @@ export default class Login extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Welcome!</Text>
+      <ImageBackground source={require('../assets/login.png')} style={styles.container}>
         <TouchableOpacity style={styles.button} onPress={this._login.bind(this)}>
           <Entypo name="facebook" size={17} color="#fff" />
           <Text style={styles.buttonText}>Login with Facebook</Text>
         </TouchableOpacity>
-      </View>
+      </ImageBackground>
     );
   }
 }
@@ -68,9 +65,10 @@ export default class Login extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    height: '100%'
   },
   title: {
     margin: 20,
@@ -83,6 +81,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection:'row',
     width: '55%',
+    marginTop: 20,
     padding: 20,
     backgroundColor: '#3b5998',
     borderRadius: 5

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "1st-project-choinashil",
+    "name": "Piccle",
     "slug": "1st-project-choinashil",
     "privacy": "public",
     "sdkVersion": "32.0.0",
@@ -14,7 +14,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#b0cde2"
+      "backgroundColor": "#bde5d1"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

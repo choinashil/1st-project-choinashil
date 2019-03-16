@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { AppLoading, SecureStore } from 'expo';
 
-const ip = '192.168.0.40';
-
 export default class SplashScreen extends Component {
   constructor(props) {
     super(props);
@@ -21,7 +19,7 @@ export default class SplashScreen extends Component {
       const token = await SecureStore.getItemAsync('ACCESS_TOKEN');
 
       if (token) {
-        const response = await fetch(`http://${ip}:3000/api/auth/check`, {
+        const response = await fetch(`http://piccle-production.eu-west-1.elasticbeanstalk.com/api/auth/check`, {
           method: 'get',
           headers: {'Authorization': `Bearer ${token}`}
         });

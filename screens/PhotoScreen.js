@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
+import { StyleSheet, View, Image, ScrollView } from 'react-native';
 import { GestureHandler } from 'expo';
 import Map from '../components/Map';
 const { TapGestureHandler, State } = GestureHandler;

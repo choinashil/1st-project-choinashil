@@ -24,12 +24,12 @@ export default class App extends Component {
   render() {
     const { userId, userName } = this.state;
     return (
-      <AppContainer 
+      <AppContainer
         screenProps={{
           userId,
           userName,
           setUserInfo: this._setUserInfo.bind(this)
-        }} 
+        }}
       />
     );
   }
