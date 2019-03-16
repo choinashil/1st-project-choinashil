@@ -1,26 +1,10 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { SecureStore, GestureHandler } from 'expo';
-import { AntDesign } from '@expo/vector-icons';
+import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
+import { GestureHandler } from 'expo';
 import Map from '../components/Map';
 const { TapGestureHandler, State } = GestureHandler;
 
 export default class PhotoScreen extends Component {
-  async _onPressLogoutOkBtn() {
-    const { setUserInfo, navigation } = this.props;
-    setUserInfo('', '');
-    await SecureStore.deleteItemAsync('ACCESS_TOKEN'); 
-    Alert.alert('Logout', '로그아웃 되었습니다');
-    navigation.navigate('LoginScreen');
-  }
-  
-  _onPressLogoutBtn() {
-    Alert.alert('Logout', '로그아웃 하시겠습니까?', [
-      {text: 'Cancel', style: 'cancel'},
-      {text: 'OK', onPress: this._onPressLogoutOkBtn.bind(this)},
-    ]);
-  }
-
   _onSingleTap(index, event) {
     const { onSingleTap } = this.props;
     if (event.nativeEvent.state === State.ACTIVE) {
@@ -29,18 +13,10 @@ export default class PhotoScreen extends Component {
   };
 
   render() {
-    const { userName, photoList } = this.props;
+    const { photoList } = this.props;
+
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.logo}>
-            <Text>LOGO</Text>
-          </View>
-          <TouchableOpacity style={styles.userTab} onPress={this._onPressLogoutBtn.bind(this)}>
-            <Text style={styles.userName}>{userName.split(' ')[0]}</Text>
-            <AntDesign name="logout" size={17} color="#34495e" />
-          </TouchableOpacity>
-        </View>
         <ScrollView
           showsVerticalScrollIndicator={false}
         >
@@ -52,20 +28,22 @@ export default class PhotoScreen extends Component {
                   onHandlerStateChange={this._onSingleTap.bind(this, index)}
                 >
                   <View style={styles.photoWrapper}>
-                    {
-                      list.showPhoto ? 
-                      <Image
-                        style={styles.photo}
-                        source={{uri: `${list.photoUrl}`}} 
-                      /> 
-                      : <Map position={{lat: list.lat, lon: list.lon}} />
-                    }
+                    <View style={styles.photoBackground}>
+                      {
+                        list.showPhoto ?
+                          <Image
+                            style={styles.photo}
+                            source={{uri: `${list.photoUrl}`}}
+                          />
+                          : <Map position={{lat: list.lat, lon: list.lon}} />
+                      }
+                    </View>
                   </View>
                 </TapGestureHandler>
               );
-            }) 
+            })
           }
-        </ScrollView> 
+        </ScrollView>
       </View>
     );
   }
@@ -77,29 +55,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff'
   },
-  header: {
-    flexDirection:'row', 
-    justifyContent: 'space-between', 
-    width: '100%',
-    paddingTop: 30,
-    paddingBottom: 15
-  },
-  logo: {
-    marginLeft: 10
-  },
-  userTab: {
-    flexDirection:'row',
-    marginRight: 10
-  },
-  userName: {
-    fontSize: 15,
-    color: '#34495e',
-    marginRight: 8
-  },
   photoWrapper: {
+    width: 320,
+    height: 320,
     marginTop: 10,
     marginBottom: 20
-  }, 
+  },
+  photoBackground: {
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    backgroundColor: '#e2f2ed'
+  },
   photo: {
     width: 320,
     height: 320,

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import { Permissions, Camera, FileSystem, Constants, Location, SecureStore } from 'expo';
+import { Permissions, Camera, Constants, Location, SecureStore } from 'expo';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const ip = '192.168.0.40';
@@ -18,35 +18,12 @@ export default class CameraScreen extends Component {
     };
     this.lat = '',
     this.lon = ''
+    this.alreadyPressed = false;
   }
 
   componentDidMount() {
     this._getPermissions();
     this._getLocation();
-  }
-
-  _cameraButton() {
-    return (
-      <TouchableOpacity
-        style={styles.mainButton}
-        onPress={this._takePicture.bind(this)}
-      >
-        <Ionicons name="ios-radio-button-on" size={70} color="#dd2745" />
-      </TouchableOpacity>
-    );
-  }
-
-  _cancelButton() {
-    return (
-      <View style={styles.cancelBar}>
-        <TouchableOpacity 
-          style={styles.toggleButton} 
-          onPress={this._onCancelBtnPress.bind(this)}
-        >
-          <AntDesign name="close" size={28} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    );
   }
 
   async _getLocation() {
@@ -64,13 +41,13 @@ export default class CameraScreen extends Component {
     });
   }
 
-  _navigateToMainScreen() {
-    const { navigation } = this.props;
-    navigation.navigate('MainScreen');
-  }
-
   _onCancelBtnPress() {
     this.setState({photoUrl: null});
+  }
+
+  _onPrevBtnPress() {
+    const { navigation } = this.props;
+    navigation.navigate('MainScreen');
   }
 
   _renderCamera() {
@@ -86,7 +63,31 @@ export default class CameraScreen extends Component {
             autoFocus={this.state.autoFocus}
           />
         </View>
-        {this._cameraButton()}
+        {this._renderCameraButton()}
+      </View>
+    );
+  }
+
+  _renderCameraButton() {
+    return (
+      <TouchableOpacity
+        style={styles.mainButton}
+        onPress={this._takePicture.bind(this)}
+      >
+        <Ionicons name="ios-radio-button-on" size={70} color="#dd2745" />
+      </TouchableOpacity>
+    );
+  }
+
+  _renderCancelButton() {
+    return (
+      <View style={styles.cancelBar}>
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={this._onCancelBtnPress.bind(this)}
+        >
+          <AntDesign name="close" size={28} color="#fff" />
+        </TouchableOpacity>
       </View>
     );
   }
@@ -117,24 +118,68 @@ export default class CameraScreen extends Component {
     const { photoUrl } = this.state;
     return (
       <View style={styles.container}>
-        {this._cancelButton()}
+        {this._renderCancelButton()}
         <View style={styles.frame}>
           <Image source={{uri: photoUrl}} style={styles.camera} />
         </View>
-        {this._saveButton()}
+        {this._renderSaveButton()}
       </View>
     );
   }
 
-  _saveButton() {
+  _renderSaveButton() {
     return (
       <TouchableOpacity
         style={styles.mainButton}
-        onPress={this._takePicture.bind(this)}
+        onPress={this._saveNewPhoto.bind(this)}
       >
-        <Ionicons name="ios-checkmark-circle" size={70} color="#69ae51" />
+        <Ionicons name="ios-checkmark-circle" size={70} color="#0eb681" />
       </TouchableOpacity>
     );
+  }
+
+  async _saveNewPhoto() {
+    if (this.alreadyPressed) return;
+
+    this.alreadyPressed = true;
+    const token = await SecureStore.getItemAsync('ACCESS_TOKEN');
+    const { userId } = this.props.screenProps;
+    const { navigation } = this.props;
+    const { photoUrl } = this.state;
+    const { lat, lon } = this;
+
+    try {
+      const photo = {
+        uri: photoUrl,
+        name: 'new-photo.jpg',
+        type: 'multipart/form-data',
+      };
+      const data = new FormData();
+      data.append('photo', photo);
+      data.append('lat', lat);
+      data.append('lon', lon);
+      data.append('createdAt', new Date().toISOString());
+
+      const config = {
+        method: 'POST',
+        body: data,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
+      navigation.navigate('MainScreen', {needToRerender: false});
+
+      const res = await fetch(`http://${ip}:3000/api/users/${userId}/my-photos`, config);
+      await res.json();
+
+      navigation.navigate('MainScreen', {needToRerender: true});
+
+      this.alreadyPressed = false;
+    } catch(err) {
+      console.log(err);
+    }
   }
 
   async _takePicture() {
@@ -151,14 +196,14 @@ export default class CameraScreen extends Component {
   _topBar() {
     return (
       <View style={styles.topBar}>
-        <TouchableOpacity 
-          style={styles.toggleButton} 
-          onPress={this._navigateToMainScreen.bind(this)}
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={this._onPrevBtnPress.bind(this)}
         >
           <Ionicons name="ios-arrow-back" size={32} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.toggleButton} 
+        <TouchableOpacity
+          style={styles.toggleButton}
           onPress={this._toggleFacing.bind(this)}
         >
           <Ionicons name="ios-reverse-camera" size={34} color="#fff" />
@@ -185,16 +230,16 @@ export default class CameraScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center', 
-    justifyContent: 'center', 
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#000'
   },
   frame: {
-    width: 320, 
-    height: 320, 
-    borderRadius: 160, 
+    width: 320,
+    height: 320,
+    borderRadius: 160,
     overflow: 'hidden'
-  }, 
+  },
   camera: {
     flex: 1
   },
