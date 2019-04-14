@@ -20,23 +20,23 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   cameraBtnWrapper: {
-    position: 'absolute', 
+    position: 'absolute',
     bottom: 20
   },
   cameraBtnOuterCircle: {
-    flex: 1, 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    width: 60, 
-    height: 60, 
-    borderColor: '#dd2745', 
-    borderWidth: 6, 
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 60,
+    height: 60,
+    borderColor: '#dd2745',
+    borderWidth: 6,
     borderRadius: 30
   },
   cameraBtnInnerCircle: {
-    width: 36, 
-    height: 36, 
-    backgroundColor: '#dd2745', 
+    width: 36,
+    height: 36,
+    backgroundColor: '#dd2745',
     borderRadius: 18
   }
 });
